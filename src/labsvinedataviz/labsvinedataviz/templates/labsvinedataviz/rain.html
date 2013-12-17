@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="Access-Control-Allow-Origin" content="*"> 
+		<title>Vine Viz</title>
+		<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/searchbar.css">
+		<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/rain.css">
+	</head>
+	<body>
+		<div class="vine-boxes">
+			<!--
+			<div class="vine-box box2d">
+				<iframe class="vine-embed" src="https://vine.co/v/bUD5xMVBlz5/embed/simple" width="100" height="100" frameborder="0"></iframe>
+				<script async src="//platform.vine.co/static/scripts/embed.js" charset="utf-8"></script>
+			</div>
+			<div class="vine-box box2d" style="position: absolute; left: 400px">
+				<iframe class="vine-embed" src="https://vine.co/v/bXZre5gtYgT/embed/simple" width="100" height="100" frameborder="0"></iframe>
+				<script async src="//platform.vine.co/static/scripts/embed.js" charset="utf-8"></script>
+			</div>
+			
+			<div class="vine-box box2d" style="background-color: black">
+				<video class="vine-vid" width="100" height="100" autoplay loop>
+				  	<source src="http://mtc.cdn.vine.co/r/videos/F8E6A49F99992201361590534144_17b5aede33b.3_ePwxPAJlZ8T7E0qjFQaxunHk4VJgFGP24MjyJeegiyFff00QgyixBMIe6taO7rlG.mp4" type="video/mp4">
+				    Your browser does not support the video tag.
+				</video>
+			</div>
+			-->
+		</div>
+		
+		<div class="top-bar" style="overflow: visible !important;">
+			<span>#</span>
+			<input id="input" type="text" value="dog" autofocus>
+			<img id="submit" src="{{ STATIC_URL }}img/btn_go-off.png">
+			<img id="suggest" src="{{ STATIC_URL }}img/btn_randomize-off.png">
+			<div class="top-bar-tab">X</div>
+			<div class="error-msg">
+				<img src="{{ STATIC_URL }}img/icon-sad.png">
+				<p class="detail">Sorry, your search gave us no recent results.</p>
+				<p class="heading">Try Again!</p>
+			</div>
+		</div>
+
+	</body>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenLite.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script src="{{ STATIC_URL }}js/inheritance.js"></script>
+	<script src="{{ STATIC_URL }}js/box2d.js"></script>
+	<script src="{{ STATIC_URL }}js/searchbar.js"></script>
+	<script src="{{ STATIC_URL }}js/rain.js"></script>
+	
+	<script src="{{ STATIC_URL }}js/analytics.js"></script>
+</html>

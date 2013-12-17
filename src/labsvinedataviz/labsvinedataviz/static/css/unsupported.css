@@ -1,0 +1,49 @@
+body {
+	margin: 0 auto;
+	overflow: hidden;
+	font-family: 'Open Sans', sans-serif;
+}
+
+a img {
+	outline: none;
+}
+
+img {
+	border: 0;
+}
+
+.unsupported {
+	position: relative;
+	text-align: center;
+	top: 170px;
+	left: 0px;
+	width: 100%;
+	color: #FFFFFF;
+}
+
+.unsupported-title {
+	font-size: x-large;
+	position: absolute;
+	top: 185px;
+	left: 0px;
+	width: 100%;
+}
+
+.unsupported-text {
+	font-size: smaller;
+	position: absolute;
+	top: 225px;
+	left: 0px;
+	width: 100%;
+}
+
+#oops-bike {
+}
+
+#get-chrome {
+	margin: 0px 30px 0px 0px;
+}
+
+#get-firefox {
+	margin: 0px 0px 0px 30px;
+}

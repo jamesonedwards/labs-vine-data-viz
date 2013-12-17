@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="Access-Control-Allow-Origin" content="*">
+		<title>Vine Tree</title>
+		<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tree.css">
+		<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/loading_animation_boxes.css">
+	</head>
+	<body>
+		<canvas id="canvas" class="vine-canvas">
+			Your browser doesn't support canvas
+		</canvas>
+		<div class="top-bar">
+			<span>Enter a tag</span>
+			<input id="input" type="text" value="">
+			<span id="submit">Submit</span>
+			<span id="clear">Clear</span>
+
+			<div id="animation_container">
+				<div id="animation_block_1" class="barlittle"></div>
+				<div id="animation_block_2" class="barlittle"></div>
+				<div id="animation_block_3" class="barlittle"></div>
+				<div id="animation_block_4" class="barlittle"></div>
+				<div id="animation_block_5" class="barlittle"></div>
+			</div>
+			<div id="notification" class="notification"></div>
+		</div>
+		<div class="vine-boxes"></div>
+
+	</body>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script src="{{ STATIC_URL }}js/canvas.curve.min.js"></script>
+	<script src="{{ STATIC_URL }}js/curvedtree.js"></script>
+</html>

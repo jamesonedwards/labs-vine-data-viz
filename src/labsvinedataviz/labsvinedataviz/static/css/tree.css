@@ -1,0 +1,70 @@
+body {
+	margin: 0 auto;
+	overflow: hidden;
+	font-family: 'Open Sans', sans-serif;
+}
+
+.notification {
+	position: absolute;
+	text-align: center;
+	display: none;
+	top: 60px;
+	left: 0px;
+	width: 100%
+}
+
+.parent-tag-div {
+	color: #FFFFFF;
+	text-align: left;
+	position: relative;
+	left: 0;
+	top: 0;
+}
+
+.parent-tag-text {
+	background-color: #08765D;
+}
+
+.metrics-div {
+	color: #FFFFFF;
+	text-align: left;
+	background-color: #3699DC;
+	position: absolute;
+	display: none;
+}
+
+.div-text-padding {
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-right: 5px;
+	padding-left: 5px;
+}
+
+.child-tags-div {
+	color: #FFFFFF;
+	text-align: left;
+	position: absolute;
+}
+
+.vine-canvas {
+	z-index: 0;
+	top: 0;
+	left: 0;
+	position: absolute;
+}
+
+.vine-box {
+	float: left;
+	text-align: center;
+}
+
+.vine-video {
+	/*position: relative;*/
+}
+
+#animation_container {
+	position: absolute;
+	text-align: center;
+	top: 60px;
+	display: none;
+}

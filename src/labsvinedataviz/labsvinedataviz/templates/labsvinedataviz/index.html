@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Vine Explorer</title>
+		<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/index.css">
+		<link rel="stylesheet" href="{{ STATIC_URL }}css/fancybox/jquery.fancybox.css" type="text/css" media="screen" />
+		<meta property="og:title" content="Vine Explorer" />
+		<meta property="og:type" content="website" />
+		<meta property="og:description" content="The Vine Explorer is a project by the team at LABSmb to develop new and intriguing ways to explore Vine content." />
+		<meta property="og:url" content="{{ root_url }}" />
+		<meta property="og:image" content="{{ root_url }}static/img/og-vineexp.png" />
+		<!-- Source: http://modernizr.com/ -->
+		<script type="text/javascript" src="{{ STATIC_URL }}js/modernizr.custom.94064.js"></script>
+		<!-- Source: http://www.quirksmode.org/js/detect.html -->
+		<script type="text/javascript" src="{{ STATIC_URL }}js/browser-detect.js"></script>
+	</head>
+
+	<body>
+		<header>
+			<img class="logo" src="{{ STATIC_URL }}img/logo_top.png">
+			<img class="hr" src="{{ STATIC_URL }}img/hrule.png">
+		</header>
+
+		<div class="middle">
+			<iframe autofocus></iframe>
+		</div>
+
+		<footer style="overflow: visible !important">
+
+			<div class="share">
+				<ul>
+					<li>
+						<a class="twitter" href="https://twitter.com/intent/tweet?url={{ root_url|urlencode }}&text={{ twitter_text|urlencode }}&hashtags=labsmb,mcgarrybowen,vine"> <img src="{{ STATIC_URL }}img/btn_tweet-off.png"> </a>
+					</li>
+					<li>
+						<a class="facebook" href="https://www.facebook.com/sharer/sharer.php?u={{ root_url|urlencode }}" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;"> <img src="{{ STATIC_URL }}img/btn_fbshare-off.png" alt="Share on Facebook"> </a>
+					</li>
+					<li>
+						<a class="linkedin" href="http://www.linkedin.com/shareArticle?mini=true&url={{ root_url|urlencode }}&title={{ root_title|urlencode }}&summary={{ share_description|urlencode }}&source={{ root_url|urlencode }}" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=520,width=570');return false;"> <img src="{{ STATIC_URL }}img/btn_linkedin-off.png" alt="Share on LinkedIn"> </a>
+					</li>
+					<li>
+						<a class="google" href="https://plus.google.com/share?url={{ root_url|urlencode }}" onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;"> <img src="{{ STATIC_URL }}img/btn_google-off.png" alt="Share on Google+"> </a>
+					</li>
+				</ul>
+				<div>
+					<img src="{{ STATIC_URL }}img/lbl_share.png">
+				</div>
+			</div>
+
+			<div class="nav">
+				<ul>
+					<li class="vineTree">
+						<img src="{{ STATIC_URL }}img/btn_tree-off.png">
+					</li>
+					<li class="vineSphere">
+						<img src="{{ STATIC_URL }}img/btn_sphere-off.png">
+					</li>
+					<li class="vineRain">
+						<img src="{{ STATIC_URL }}img/btn_rain-off.png">
+					</li>
+					<li class="vineWall">
+						<img src="{{ STATIC_URL }}img/btn_wall-off.png">
+					</li>
+				</ul>
+			</div>
+
+			<div class="about">
+				<div class="info">
+					<img src='{{ STATIC_URL }}img/btn_info-off.png'>
+				</div>
+				<div class="labsmb">
+					<a href="http://labsmb.tumblr.com/" target="_blank"><img src='{{ STATIC_URL }}img/logo_labs.png'></a>
+				</div>
+				<div>
+					<a id="tc_iframe" data-fancybox-type="iframe" class="terms_and_conditions" href="/terms">Terms of Use / Privacy Policy</a>
+				</div>
+			</div>
+
+			<div class="info-detail">
+				<p>
+					This is an experiment designed to explore the boundaries of technology, interfaces and customer experiences.  It is not affiliated with or endorsed by Vine.
+				</p>
+				<p>
+					At LABS we had noticed a distinct lack of methods to search through Vine content, other than to use the app itself. LABS undertook the challenge of pulling apart the nuances of the API to see what would be possible and explore new ways of browsing the video content of Vine as well as show new connections between Vines that were not discovered yet.
+					<br>
+					<br>
+					The result is a variety of visual explorers for Vine that allow users to delve into the wold of Vine in new ways and immerse the user into 2D and 3D worlds surrounded by the Vine videos all connected along a similar thread.
+				</p>
+			</div>
+
+		</footer>
+
+		<script type="text/javascript" src="//platform.twitter.com/widgets.js"></script>
+		<script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script type="text/javascript" src="{{ root_url }}static/js/fancybox/jquery.fancybox.pack.js"></script>
+		<script>
+			vineButtons = ['vineTree', 'vineSphere', 'vineRain', 'vineWall'];
+			vineImages = ['tree', 'sphere', 'rain', 'wall'];
+
+			addImageHover('twitter', 'tweet');
+			addImageHover('facebook', 'fbshare');
+			addImageHover('linkedin', 'linkedin');
+			addImageHover('google', 'google');
+			addImageHover('vineTree', 'tree');
+			addImageHover('vineSphere', 'sphere');
+			addImageHover('vineRain', 'rain');
+			addImageHover('vineWall', 'wall');
+			addImageHover('info', 'info');
+
+			// If browser is good, add click events, else display browser message as iframe.
+			var myBrowser = BrowserDetect.browser.toLowerCase();
+			if (Modernizr.canvas && Modernizr.video && Modernizr.webgl && (myBrowser == 'firefox' || myBrowser == 'chrome' || myBrowser == 'safari')) {
+				addImageClick('vineTree', 'tree');
+				addImageClick('vineSphere', 'sphere');
+				addImageClick('vineRain', 'rain');
+				addImageClick('vineWall', 'wall');
+			} else {
+				// load no-support page instead.
+				$('iframe').attr('src', '/unsupported');
+			}
+
+			// Randomize initial experiment.
+			var rand = Math.floor(Math.random() * vineButtons.length);
+			var startPage = vineButtons[rand];
+			$('.' + startPage).click();
+
+			$('.info').find('img').click(function() {
+				if ($('footer').hasClass('expanded')) {
+					$('footer').animate({
+						height : "112px"
+					}, 500);
+					$('footer').removeClass('expanded');
+					$('.info-detail').animate({
+						marginTop : "-30px"
+					}, 500);
+				} else {
+					$('footer').animate({
+						height : "340px"
+					}, 500);
+					$('footer').addClass('expanded');
+					$('.info-detail').animate({
+						marginTop : "0px"
+					}, 500);
+				}
+			});
+
+			function addImageHover(containerClass, imgName) {
+				$('.' + containerClass).hover(function() {
+					if (!$(this).hasClass('selected'))
+						$(this).find('img').attr('src', '{{ STATIC_URL }}img/btn_' + imgName + '-over.png');
+				}, function() {
+					if (!$(this).hasClass('selected'))
+						$(this).find('img').attr('src', '{{ STATIC_URL }}img/btn_' + imgName + '-off.png');
+				});
+			}
+
+			function addImageClick(containerClass, imgName) {
+				$('.' + containerClass).click(function() {
+
+					// turn on this button
+					$(this).find('img').attr('src', '{{ STATIC_URL }}img/btn_' + imgName + '-in.png');
+					$(this).addClass('selected');
+
+					// turn off all other buttons
+					for (var i = 0; i < vineButtons.length; i++) {
+						if (vineButtons[i] != containerClass) {
+							$('.' + vineButtons[i]).find('img').attr('src', '{{ STATIC_URL }}img/btn_' + vineImages[i] + '-off.png');
+							$('.' + vineButtons[i]).removeClass('selected');
+						}
+					}
+
+					// populate iframe
+					//$('iframe').attr('src', '/' + imgName);
+					$('iframe').attr('src', '/intro?q=' + imgName);
+				});
+			}
+
+		</script>
+
+		<script type="text/javascript">
+			$(document).ready(function() {
+				/* This is basic - uses default settings */
+				$("a#tc_iframe").fancybox();
+			});
+		</script>
+
+		<script src="{{ STATIC_URL }}js/analytics.js"></script>
+
+	</body>
+
+</html>

@@ -1,0 +1,12 @@
+*.pyc
+settings.py
+/src/processing_visualization/.metadata
+/deploy
+src/labsvinedataviz/cache/
+
+/creative/vineexplorer/Assets/*.db
+
+/creative/vineexplorer/design/*.db
+src/labsvinedataviz/.settings/org.eclipse.ltk.core.refactoring.prefs
+creative/screenshot-20130926.png
+src/labsvinedataviz/labsvinedataviz/client_secrets.json

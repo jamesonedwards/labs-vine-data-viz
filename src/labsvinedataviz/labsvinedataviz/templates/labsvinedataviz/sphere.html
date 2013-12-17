@@ -1,0 +1,388 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<title>vineSphere</title>
+		<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/searchbar.css">
+		<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/sphere.css">
+	</head>
+	<body>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="{{ STATIC_URL }}js/three.min.js"></script>
+		<script src="{{ STATIC_URL }}js/tween.min.js"></script>
+		<script src="{{ STATIC_URL }}js/three/controls/TrackballControls.js"></script>
+		<script src="{{ STATIC_URL }}js/three/renderers/CSS3DRenderer.js"></script>
+			
+		<div id="wrapper">
+			<div class="sphere-shadow-wrapper">
+				<img class="sphere-shadow" src="{{ STATIC_URL }}img/sphere-shadow.png">
+			</div>
+						
+			<div id="container"></div>
+		
+			<div class="top-bar" style="overflow: visible !important;">
+				<span>#</span>
+				<input id="input" type="text" value="beach" autofocus>
+				<img id="submit" src="{{ STATIC_URL }}img/btn_go-off.png">
+				<img id="suggest" src="{{ STATIC_URL }}img/btn_randomize-off.png">
+				<div class="top-bar-tab">X</div>
+				<div class="error-msg">
+					<img src="{{ STATIC_URL }}img/icon-sad.png">
+					<p class="detail">Sorry, your search gave us no recent results.</p>
+					<p class="heading">Try Again!</p>
+				</div>
+			</div>
+		</div>
+		
+		<script src="{{ STATIC_URL }}js/searchbar.js"></script>
+		<script>
+
+			var table = [];
+			var camera, scene, projector, renderer;
+			var geometry, material, mesh;
+			var controls;
+			var objects = [];
+			var targets = { table: [], sphere: []};
+			var light;
+			var faces = [];
+			
+			var sphereRadius = 1000;
+			var vineSize = 320;
+			var numVines = 50;
+			var defaultDistanceToCamera = 2000;
+			//var sceneCanvas, rendererCanvas;
+			
+			// submit button event			
+			//$("#submit").click(getData);
+			$("#submit").click(function() {
+				var tag = document.getElementById("input").value;
+				if (tag.trim() == "") return;
+				window.location = "/sphere?q=" + document.getElementById("input").value;
+			});
+			
+			$("#suggest").click(function() {
+				var tag = document.getElementById("input").value;
+				if (tag.trim() != "") return;
+				window.location = "/sphere?q=" + document.getElementById("input").value;
+			});
+			
+				
+			// hit enter event
+			document.addEventListener('keyup', function onDocumentKeyUp( event ) {
+				if ( event.keyCode == 13 ) 
+					window.location = "/sphere?q=" + document.getElementById("input").value;
+			}, false);
+
+			getData();
+
+			//init();
+			//animate();
+
+			function init() {
+
+				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 5000 );
+				camera.position.z = defaultDistanceToCamera;
+				scene = new THREE.Scene();
+				
+				renderer = new THREE.CSS3DRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.domElement.style.position = 'absolute';
+				renderer.domElement.style.top = 0;
+				document.getElementById( 'container' ).appendChild( renderer.domElement );
+
+				controls = new THREE.TrackballControls( camera, renderer.domElement );
+				//controls.noZoom = true;
+				controls.noPan = true;
+				controls.staticMoving = false;
+				controls.dynamicDampingFactor = 0.3;
+				controls.rotateSpeed = 0.5;
+				controls.zoomSpeed = 0.25;
+				controls.minDistance = sphereRadius * 1;
+				controls.maxDistance = sphereRadius * 3;
+				controls.addEventListener( 'change', render );
+
+				for (var i = 0; i < table.length; i++) {
+					var item = table[i];
+
+					var vineBox = document.createElement('div');
+					vineBox.className = 'vine-box';
+					
+					
+					var vine = vineBox.appendChild(document.createElement('video'));
+					vine.className = 'vine';
+					vine.width = vineSize;
+					vine.height = vineSize;
+					vine.videoUrl = item.videoUrl;
+					//vine.src = item.videoUrl;
+					//vine.src = 'http://mtc.cdn.vine.co/r/videos/F8E6A49F99992201361590534144_17b5aede33b.3_ePwxPAJlZ8T7E0qjFQaxunHk4VJgFGP24MjyJeegiyFff00QgyixBMIe6taO7rlG.mp4';
+					vine.poster = item.thumbnailUrl;
+					//vine.autoplay = 'true';
+					//vine.loop = 'true';
+					//vine.muted = 'true';
+					//vine.pause();
+					vine.idx = i;  // used to identify which item in objects[] this is
+					vine.selected = 'false';
+					
+					vineBox.addEventListener('click', onVineClick, false);
+					
+					var closeVine = vineBox.appendChild(document.createElement('div'));
+					closeVine.className = 'close-vine';
+					closeVine.innerHTML = "X";
+					closeVine.style.display = "none";
+					closeVine.addEventListener('click', onCloseVineClick, false);
+					
+					var tagList = table[i].tags;
+					var tagUL = vineBox.appendChild(document.createElement('ul'));
+					tagUL.className = 'tag-list';
+					tagUL.style.display = "none";
+					
+					for (var j = 0; j < 4; j++){
+						if (tagList[j]) {
+							var tagLI = tagUL.appendChild(document.createElement('li'));
+							tagLI.className = 'tag';
+							tagLI.innerHTML = tagList[j].tag;
+							tagLI.addEventListener('click', function(e) { window.location = "/sphere?q=" + e.target.innerHTML; }, false);
+						}
+					}
+					
+					var object = new THREE.CSS3DObject( vineBox );
+					object.position.x = Math.random() * 4000 - 2000;
+					object.position.y = Math.random() * 4000 - 2000;
+					object.position.z = Math.random() * 4000 - 2000;
+					scene.add( object );
+	
+					objects.push( object );
+				}
+				
+				// sphere
+				var vector = new THREE.Vector3();
+
+				for ( var i = 0, l = objects.length; i < l; i ++ ) {
+					var object = objects[i];
+					var phi = Math.acos( -1 + ( 2 * i ) / l );
+					var theta = Math.sqrt( l * Math.PI ) * phi;
+					var object = new THREE.Object3D();
+
+					object.position.x = sphereRadius * Math.cos( theta ) * Math.sin( phi );
+					object.position.y = sphereRadius * Math.sin( theta ) * Math.sin( phi );
+					object.position.z = sphereRadius * Math.cos( phi );
+					
+					vector.copy( object.position ).multiplyScalar( 2 );
+					object.lookAt( vector );
+					
+					targets.sphere.push( object );
+				}
+
+				transform( targets.sphere, 2500 );
+					
+				window.addEventListener('resize', onWindowResize, false);
+				document.getElementById('container').addEventListener('mousewheel', onMouseWheel, false);
+
+				animate();
+			}
+
+			function transform( targets, duration ) {
+				TWEEN.removeAll();
+
+				for ( var i = 0; i < objects.length; i ++ ) {
+					var object = objects[ i ];
+					var target = targets[ i ];
+
+					new TWEEN.Tween( object.position )
+						.to( { x: target.position.x, y: target.position.y, z: target.position.z }, Math.random() * duration + duration )
+						.easing( TWEEN.Easing.Exponential.InOut )
+						.start();
+
+					new TWEEN.Tween( object.rotation )
+						.to( { x: target.rotation.x, y: target.rotation.y, z: target.rotation.z }, Math.random() * duration + duration )
+						.easing( TWEEN.Easing.Exponential.InOut )
+						.start();
+				}
+				
+				// tween sphere shadown to become more opaque
+				var sphereShadow = document.getElementsByClassName('sphere-shadow')[0];
+				sphereShadow.style.opacity = 0.0;
+				new TWEEN.Tween( sphereShadow.style )
+					.to( { opacity: 0.75 }, duration * 2 )
+					.easing( TWEEN.Easing.Exponential.InOut )
+					.start();
+
+				new TWEEN.Tween( this )
+					.to( {}, duration * 2 )
+					.onUpdate( render )
+					.start();
+			}
+			
+			function onVineClick(e) {
+				var target = (e.target) ? e.target : e.srcElement;
+				console.log(target);
+				
+				// if already selected or if close button was clicked, do nothing
+				if (target.selected === true || target.className != 'vine') return;
+				
+				// close any other vines that are open
+				var allVines = document.getElementsByClassName('vine');
+				for (var i = 0; i < allVines.length; i++) {
+					if (allVines[i].selected === true && allVines[i].idx != target.idx) {
+						var closeButton = allVines[i].parentNode.getElementsByClassName('close-vine')[0];
+						onCloseVineClick({target: closeButton});
+					}
+				}
+				
+				// set source so video plays
+				console.log(target.src);
+				if (target.src == '')
+					target.src = target.videoUrl;
+			
+				// show close button
+				target.parentNode.getElementsByClassName('close-vine')[0].style.display = "block";
+				target.parentNode.getElementsByClassName('tag-list')[0].style.display = "block";
+				target.play();
+				target.autoplay = 'true';
+				target.loop = 'true';
+				target.muted = 0;
+				target.setAttribute('controls', 'true');
+				target.removeAttribute('controls');
+				
+				// save current position
+				target.originalPosition = $.extend(true, {}, objects[target.idx].position);
+				target.originalRotation = $.extend(true, {}, objects[target.idx].rotation);
+				
+				var distanceToCam = 260;
+				var camMag = Math.sqrt(Math.pow(camera.position.x, 2) + Math.pow(camera.position.y, 2) + Math.pow(camera.position.z, 2));
+				var xPos = (camera.position.x / camMag) * (camMag - distanceToCam);
+				var yPos = (camera.position.y / camMag) * (camMag - distanceToCam);
+				var zPos = (camera.position.z / camMag) * (camMag - distanceToCam);
+
+				new TWEEN.Tween( objects[target.idx].position )
+					.to( { x: xPos, y: yPos, z: zPos }, 1500)
+					.easing( TWEEN.Easing.Exponential.InOut )
+					.start();
+				
+				new TWEEN.Tween( objects[target.idx].rotation )
+					.to( { x: camera.rotation.x, y: camera.rotation.y, z: camera.rotation.z }, 1500 )
+					.easing( TWEEN.Easing.Exponential.InOut )
+					.start();
+
+				new TWEEN.Tween( this )
+					.to( {}, 1500 )
+					.onUpdate( render )
+					.start();
+					
+				target.selected = true;
+			}
+			
+			function onCloseVineClick(e) {
+				var target = (e.target) ? e.target : e.srcElement;
+				target = target.parentNode.getElementsByClassName('vine')[0];
+				console.log(target);
+				
+				if (target.selected === false) return;
+				
+				// hide close button, re-mute
+				target.parentNode.getElementsByClassName('close-vine')[0].style.display = "none";
+				target.parentNode.getElementsByClassName('tag-list')[0].style.display = "none";
+				target.muted = 'true';
+				target.pause();
+					
+				// return selected object to original position.
+				new TWEEN.Tween( objects[target.idx].position )
+					.to( { x: target.originalPosition.x, y: target.originalPosition.y, z: target.originalPosition.z }, 2000)
+					.easing( TWEEN.Easing.Exponential.InOut )
+					.start();
+				
+				new TWEEN.Tween( objects[target.idx].rotation )
+					.to( { x: target.originalRotation.x, y: target.originalRotation.y, z: target.originalRotation.z }, 2000 )
+					.easing( TWEEN.Easing.Exponential.InOut )
+					.start();
+
+				new TWEEN.Tween( this )
+					.to( {}, 2000 )
+					.onUpdate( render )
+					.start();
+					
+				setTimeout(function() { target.selected = false; }, 2000);
+			}
+
+			function onWindowResize() {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+			
+			function onMouseWheel(e) {
+				// must run after camera has moved, so wait a bit
+				setTimeout(function() {
+					var sphereShadow = document.getElementsByClassName("sphere-shadow")[0];
+					var distanceToCamera = camera.position.distanceTo({x: 0, y: 0, z: 0});
+					var newWidth = (1500000/distanceToCamera) - 120;
+
+					// tween to new position
+					new TWEEN.Tween( {w: sphereShadow.width} )
+						.to( { w: newWidth }, 10 )
+						//.easing( TWEEN.Easing.Exponential.InOut )
+						.onUpdate(function() {
+							sphereShadow.style.width = this.w + 'px';
+						})
+						.start();
+				}, 50);
+			}
+
+			var theta = 0;
+			function animate() {
+				requestAnimationFrame( animate );
+				
+				/* TODO: for auto-rotate
+				theta += 0.001;
+	            camera.position.x += Math.sin(theta);
+	            //camera.position.y = 1800 * Math.sin(theta);
+	            //camera.position.z += Math.cos(theta);
+	            camera.lookAt( scene.position );
+	            camera.updateMatrixWorld();
+				*/
+				
+				TWEEN.update();
+				controls.update();
+			}
+
+			function render() {
+				renderer.render(scene, camera);
+			}
+
+			function getData() {
+				var param = getParameter("q");
+
+				var queryUrl = "/search_by_tag/?page=1&pageSize=" + numVines + "&tag=" + param;
+				if (param == "")
+					queryUrl = "/get_popular/?page=1&pageSize=" + numVines;
+			
+				$.ajax({
+				    url: queryUrl,
+				    type: 'GET',
+				    dataType: 'JSONP',
+				    success: function(data){
+						table = data.results.records;
+						
+						if (table.length == 0) {
+				    		displayError();
+				    		return;
+				    	}
+						
+						// remove all objects from scene
+						if (scene)
+							for (var i = 0; i < objects.length; i++)
+								scene.remove( objects[i] );
+						objects.length = 0;  // this clears the array
+						
+						init();
+				    }
+				});
+			}
+		</script>
+		
+		<script src="{{ STATIC_URL }}js/analytics.js"></script>
+	</body>
+</html>

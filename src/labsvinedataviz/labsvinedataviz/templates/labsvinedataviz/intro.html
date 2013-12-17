@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Vine Explorer</title>
+	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/intro.css">
+</head>
+<body>
+	
+	<div class="wrapper">
+		<img class="logo" src="{{ STATIC_URL }}img/icon_sphere.png">
+		<div class="input-container">
+			<span>#</span>
+			<input id="input" type="text" placeholder="Type Hashtag" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Type Hashtag'">
+			<img id="go" src="{{ STATIC_URL }}img/btn_go-off.png">
+			<img id="suggest" src="{{ STATIC_URL }}img/btn_randomize-over.png">
+		</div>
+		<div class="error-msg">
+			Please enter a single word with no spaces or special characters.
+		</div>
+		<p class="desc"></p>
+	</div>
+	
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script>
+		
+		var query = getParameter('q');
+		var logo = "";
+		var targetPage = "";
+		var desc = "";
+		
+		init();
+		
+		function enableSuggestButton() {
+			$('#suggest').css({
+				'opacity' : '1',
+				'cursor' : 'pointer'
+			}).on('mouseover', function(e) {
+				$(this).attr('src', '/static/img/btn_randomize-over.png');
+			}).on('mouseout', function(e) {
+				$(this).attr('src', '/static/img/btn_randomize-off.png');
+			}).on('click', function(e) {
+				$('body').fadeOut(400, function() {
+					window.location = "/" + targetPage + "?q=";
+				});
+			});
+		}
+		
+		function disableSuggestButton() {
+			$('#suggest').css({
+				'opacity' : '.5',
+				'cursor' : 'default'
+			}).off('mouseover').off('mouseout').off('click');
+		}
+		
+		function init() {
+			
+			if (query == null) return;
+		
+			// load dynamic elements on page
+			
+			logo = 'icon_' + query + '.png';
+			targetPage = query;
+			
+			if (query == 'sphere') {
+				desc = 'The Explorosphere will create a 3-dimensional sphere using the Vines that contain the searched hashtag. Once created the sphere can be manipulated in 3-D space using your mouse. Clicking on any single vine will allow you to view that vine in full, and clicking a hashtag will regenerate the sphere based on that hashtag.'
+					+ '<br><br>'
+					+ 'This explorer was written in JavaScript. To get Vine data, it sends requests to a Django backend which includes a Vine API. The 3-D animation was created using three.js. The library’s CSS3DRenderer allowed easy rendering of HTML5 DOM elements such as video tags in 3D space.';
+			} else if (query == 'rain') {
+			 	desc = 'Raining Vines responds to a hashtag search by raining down the resulting Vines. Every search yields more Vines and they react as if gravity and physics are affecting them, causing them to rain down from the top of the browser, bounce around, and pile up below. When you hover over a Vine it will begin playing and you can also pick each one up and throw it across the browser window and watch it collide with the rest.'
+			 		+ '<br><br>'
+			 		+ 'This explorer was written in JavaScript. To get Vine data, it sends requests to a Django backend which includes a Vine API. A library called Box2Djs (a port of the original Box2D to JavaScript) was used to simulate 2-D physics.';
+			} else if (query == 'tree') {
+				desc = 'The Hashtag Tree will create a visual thread of vines using the hashtags associated with each individual vine as the connecting point.  An initial search will start your tree. All other hashtags associated with that vine will trigger a new search and the next level of Vines will be generated. This process continues to form an ever expanding tree of hashtag connected Vines with the double-clicking of a Vine triggering a new search and the process starting over again.' 
+						+ '<br><br>' 
+						+ 'To create the hashtag tree, we used HTML5 Canvas to draw the UI elements, and JavaScript to make AJAX requests to a Django backend. This backend interacts with the Vine API, providing an additional abstraction layer to aid with security and performance.';
+			} else if (query == 'wall')
+				desc = 'Flythrough is a 3-dimensional interface of Vines based on a searched hashtag. The user can flythrough the resulting Vines to explore the results. Each search will trigger in a new 3-D flythrough to be generated, and selecting a Vine from the flythrough will allow the user to view the Vine in full.';
+				
+			document.getElementsByClassName('logo')[0].src = "{{ STATIC_URL }}img/" + logo;
+			document.getElementsByClassName('desc')[0].innerHTML = desc;	
+		
+			// tie in events
+			/*
+			document.getElementById("go").addEventListener("mouseover", function(e) {
+				var target = (e.target) ? e.target : e.srcElement;
+				target.setAttribute("src", "{{ STATIC_URL }}img/btn_go-over.png");
+			}, false);
+			
+			document.getElementById("go").addEventListener("mouseout", function(e) {
+				var target = (e.target) ? e.target : e.srcElement;
+				target.setAttribute("src", "{{ STATIC_URL }}img/btn_go-off.png");
+			}, false);
+			
+			document.getElementById("go").addEventListener("click", function(e) {
+				var target = (e.target) ? e.target : e.srcElement;
+				$('body').fadeOut(400, function() {
+					window.location = "/" + targetPage + "?q=" + document.getElementById('input').value;	
+				});
+			}, false);
+			*/
+			
+			// hit enter event
+			document.addEventListener('keyup', function onDocumentKeyUp( event ) {
+				if ( event.keyCode == 13 ) 
+					$('#go').click();
+			}, false);
+			
+			// only allow apha numeric chars
+			// UPDATE (JE): Allow backspace and delete keys.
+			$('#input').bind('keypress', function (e) {
+			    if (e.keyCode != 8 && e.keyCode != 46) {
+				    var regex = new RegExp("^[a-zA-Z0-9]+$");
+				    var key = String.fromCharCode(!e.charCode ? e.which : e.charCode);
+				    if (!regex.test(key)) {
+				       e.preventDefault();
+				       return false;
+				    }
+				}
+			});
+
+			// UPDATE (JE): Added suggest button.
+			enableSuggestButton();
+
+			// if field is blank, grey out go button, else un-grey
+			$('#input').bind('keyup', function(e) {
+			    if ($(this).val() == '') {
+			    	$('#go').css('opacity', '.5');
+			    	$('#go').css('cursor', 'default');
+			    	$('#go').off('mouseover');
+			    	$('#go').off('mouseout');
+			    	$('#go').off('click');
+
+					// UPDATE (JE): Added suggest button.
+					enableSuggestButton();
+			    } else {
+			    	$('#go').css('opacity', '1');
+			    	$('#go').css('cursor', 'pointer');
+			    	$('#go').on('mouseover', function(e){ $(this).attr('src','{{ STATIC_URL }}img/btn_go-over.png'); });
+			    	$('#go').on('mouseout', function(e){ $(this).attr('src','{{ STATIC_URL }}img/btn_go-off.png'); });
+			    	$('#go').on('click', function(e){
+			    		$('body').fadeOut(400, function() {
+							window.location = "/" + targetPage + "?q=" + document.getElementById('input').value;
+						});
+			    	});
+			    
+					// UPDATE (JE): Added suggest button.
+					disableSuggestButton();
+			    }
+			});
+			
+		}
+		
+		
+		function getParameter(paramName) {
+			var searchString = window.location.search.substring(1),
+		    	i, val, params = searchString.split("&");
+		
+			for (i=0;i<params.length;i++) {
+				val = params[i].split("=");
+				if (val[0] == paramName)
+			  		return unescape(val[1]);
+			}
+			return null;
+		}
+		
+	</script>
+	
+	<script src="{{ STATIC_URL }}js/analytics.js"></script>
+	
+</body>
+</html>

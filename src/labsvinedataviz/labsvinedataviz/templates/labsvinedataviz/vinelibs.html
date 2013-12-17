@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="Access-Control-Allow-Origin" content="*">
+		<title>Vine Tree</title>
+		<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/vinelibs.css">
+		<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/loading_animation_boxes.css">
+	</head>
+	<body>
+		<div class="top-bar">
+			<span>Enter a tag</span>
+			<input id="input" type="text" value="loop ,is a #test!" placeholder="Say or type something" size=50 speech x-webkit-speech>
+			<span id="submit">Submit</span>
+
+			<div id="animation_container">
+				<div id="animation_block_1" class="barlittle"></div>
+				<div id="animation_block_2" class="barlittle"></div>
+				<div id="animation_block_3" class="barlittle"></div>
+				<div id="animation_block_4" class="barlittle"></div>
+				<div id="animation_block_5" class="barlittle"></div>
+			</div>
+			<div id="notification" class="notification"></div>
+			<div>
+				<a id="shareUrl"></a>
+			</div>
+		</div>
+		<div class="vine-boxes"></div>
+		<div id="save">
+			Save
+		</div>
+
+	</body>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script src="{{ STATIC_URL }}js/vinelibs.js"></script>
+</html>

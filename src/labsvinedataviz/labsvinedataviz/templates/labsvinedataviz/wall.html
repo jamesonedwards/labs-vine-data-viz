@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<title>three.js css3d - youtube</title>
+		<style>
+			html, body {
+				height: 100%;
+			}
+
+			body {
+                margin: 0 auto;
+				font-family: Arial;
+				overflow: hidden;
+			}
+
+			#search {
+				position: absolute;
+				top: 50px;
+				width: 100%;
+				text-align: center;
+			}
+
+			#search input {
+				color: #ffffff;
+				background-color: transparent;
+				border: 1px solid #0080ff;
+				padding: 10px;
+				font-size: 20px;
+				text-transform: uppercase;
+				-webkit-border-radius: 0px;
+				/* workaround for ios safari */
+			}
+
+			#search button {
+				color: #0080ff;
+				background-color: transparent;
+				border: 1px solid #0080ff;
+				padding: 10px;
+				font-size: 20px;
+				text-transform: uppercase;
+				cursor: pointer;
+			}
+		</style>
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/searchbar.css">
+	</head>
+	<body>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <!--
+        <script src="../build/three.min.js"></script>
+		<script src="js/libs/tween.min.js"></script>
+        <script src="js/renderers/CSS3DRenderer.js"></script>
+        -->
+        <script src="{{ STATIC_URL }}js/three.min.js"></script>
+        <script src="{{ STATIC_URL }}js/tween.min.js"></script>
+        <script src="{{ STATIC_URL }}js/three/renderers/CSS3DRenderer.js"></script>
+
+		<div id="container"></div>
+        <div class="top-bar" style="overflow: visible !important;">
+            <span>#</span>
+            <input id="input" type="text" value="dog" autofocus>
+            <img id="submit" src="{{ STATIC_URL }}img/btn_go-off.png">
+			<img id="suggest" src="{{ STATIC_URL }}img/btn_randomize-off.png">
+            <div class="top-bar-tab">X</div>
+            <div class="error-msg">
+                <img src="{{ STATIC_URL }}img/icon-sad.png">
+                <p class="detail">Sorry, your search gave us no recent results.</p>
+                <p class="heading">Try Again!</p>
+            </div>
+        </div>
+
+		<script src="{{ STATIC_URL }}js/searchbar.js"></script>
+		<script>
+			var camera, scene, renderer;
+			var player;
+
+			var auto = true;
+
+			var Element = function ( entry ) {
+
+				// Create Element the size of a vine video
+                var dom = document.createElement( 'div' );
+				dom.style.width = '480px';
+				dom.style.height = '480px';
+
+				var image = document.createElement( 'img' );
+				image.style.position = 'absolute';
+				image.style.width = '480px';
+				image.style.height = '480px';
+				image.src = entry.thumbnailUrl
+				dom.appendChild( image );
+
+				var button = document.createElement( 'img' );
+				button.style.position = 'absolute';
+				button.style.left = ( ( 480 - 90 ) / 2 ) + 'px';
+				button.style.top = ( ( 480 - 90 ) / 2 ) + 'px';
+				button.style.visibility = 'hidden';
+				button.style.WebkitFilter = 'grayscale()';
+				button.src = '{{ STATIC_URL }}img/video-play-btn.png';
+				dom.appendChild( button );
+
+				var blocker = document.createElement( 'div' );
+				blocker.style.position = 'absolute';
+				blocker.style.width = '480px';
+				blocker.style.height = '480px';
+				blocker.style.background = 'rgba(0,0,0,0.5)';
+				blocker.style.cursor = 'pointer';
+				dom.appendChild( blocker );
+
+				// Spread them around a bit
+                var object = new THREE.CSS3DObject( dom );
+				object.position.x = Math.random() * 4000 - 2000;
+				// object.position.y = Math.random() * 2000 - 1000;
+				object.position.y = 3000;
+				object.position.z = Math.random() * - 5000;
+
+				image.addEventListener( 'load', function ( event ) {
+
+					button.style.visibility = 'visible';
+
+					new TWEEN.Tween( object.position )
+						.to( { y: Math.random() * 2000 - 1000 }, 2000 )
+						.easing( TWEEN.Easing.Exponential.Out )
+						.start();
+
+				}, false );
+
+				//Make it Color
+                dom.addEventListener( 'mouseover', function () {
+
+					button.style.WebkitFilter = '';
+					blocker.style.background = 'rgba(0,0,0,0)';
+
+				}, false );
+
+				// Make it Grey
+                dom.addEventListener( 'mouseout', function () {
+
+					button.style.WebkitFilter = 'grayscale()';
+					blocker.style.background = 'rgba(0,0,0,0.75)';
+
+				}, false );
+
+				dom.addEventListener( 'click', function ( event ) {
+
+					event.stopPropagation();
+
+					auto = false;
+
+					if ( player !== undefined ) {
+
+						player.parentNode.removeChild( player );
+						player = undefined;
+
+					}
+
+					player = document.createElement( 'iframe' );
+					player.style.position = 'absolute';
+					player.style.width = '480px';
+					player.style.height = '480px';
+					player.style.border = '0px';
+					//https://vine.co/v/hrI6wT7HI2W/embed/simple
+					player.src = entry.shareUrl + '?embed/simple';
+					this.appendChild( player );
+
+					var prev = object.position.z + 400;
+
+					new TWEEN.Tween( camera.position )
+						.to( { x: object.position.x, y: object.position.y - 25 }, 1500 )
+						.easing( TWEEN.Easing.Exponential.Out )
+						.start();
+
+					new TWEEN.Tween( { value: prev } )
+						.to( { value: 0  }, 2000 )
+						.onUpdate( function () {
+
+							move( this.value - prev );
+							prev = this.value;
+
+						} )
+						.easing( TWEEN.Easing.Exponential.Out )
+						.start();
+
+				}, false );
+
+				return object;
+
+			};
+
+			init();
+			animate();
+
+			function init() {
+
+				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 5000 );
+				camera.position.y = - 25;
+
+				scene = new THREE.Scene();
+
+				renderer = new THREE.CSS3DRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.domElement.style.position = 'absolute';
+				renderer.domElement.style.top = 0;
+				document.getElementById( 'container' ).appendChild( renderer.domElement );
+
+				//
+
+				var query = document.getElementById( 'input' );
+				query.addEventListener( 'keyup', function ( event ) {
+
+					if ( event.keyCode === 13 ) {
+
+						search( query.value );
+
+					}
+
+				}, false );
+
+				var button = document.getElementById( 'submit' );
+				button.addEventListener( 'click', function ( event ) {
+
+					search( query.value );
+
+				}, false );
+
+				search( query.value );
+
+				document.body.addEventListener( 'mousewheel', onMouseWheel, false );
+
+				document.body.addEventListener( 'click', function ( event ) {
+
+					auto = true;
+
+					if ( player !== undefined ) {
+
+						player.parentNode.removeChild( player );
+						player = undefined;
+
+					}
+
+					new TWEEN.Tween( camera.position )
+							.to( { x: 0, y: - 25 }, 1500 )
+							.easing( TWEEN.Easing.Exponential.Out )
+							.start();
+
+				}, false );
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function getUrlParameter(name) {
+				return decodeURI((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]);
+			}
+
+			function search( query ) {
+
+				//var tag = document.getElementById("input").value;
+				//if (tag.trim() == "") return;
+				var query = getUrlParameter('q');
+				var queryUrl = '';
+				if (query == null || query == 'null' || query == undefined || query.length == 0) {
+					// If there was no query in the URL, try the input box.
+					var tag = $('#input').val().toLowerCase().trim();				
+					if (tag.length == 0) {
+						// No URL param and no term in the search box so use popular Vines endpoint.
+						queryUrl = '/get_popular/?page=1&pageSize=50';
+					} else {
+						// Search by tag.
+						queryUrl = '/search_by_tag/?page=1&pageSize=50&tag=' + tag;
+					}
+				} else {
+					// Search by tag.
+					queryUrl = '/search_by_tag/?page=1&pageSize=50&tag=' + query;
+				}
+				
+				for ( var i = 0, l = scene.children.length; i < l; i ++ ) {
+
+					( function () {
+
+						var object = scene.children[ i ];
+						var delay = Math.random() * 100;
+
+						new TWEEN.Tween( object.position )
+							.to( { y: - 2000 }, 1000 )
+							.delay( delay )
+							.easing( TWEEN.Easing.Exponential.In )
+							.onComplete( function () {
+
+								scene.remove( object );
+
+							} )
+							.start();
+
+					} )();
+
+				}
+
+				var request = new XMLHttpRequest();
+				request.responseType = 'JSONP';
+				request.addEventListener( 'load', onData, false );
+				//request.open( 'GET', 'http://vinedataviz.labsmb.com/search_by_tag/?page=1&pageSize=3&tag=' + query + '&callback=aaa', true );
+				//request.send( null );
+				//var queryUrl = 'http://vinedataviz.labsmb.com/search_by_tag/?page=1&pageSize=50&tag=' + tag;
+				
+			$.ajax({
+			            url: queryUrl,
+			            type: 'GET',
+			            dataType: 'JSONP',
+			            success: function(data){
+							var entries = data.results.records;
+							if (entries.length == 0) {
+								displayError();
+								return;
+							}
+							
+								for ( var i = 0; i < entries.length; i ++ ) {
+
+									var object = new Element( entries[ i ] );
+									scene.add( object );
+
+								}
+			            }
+			      });
+
+			}
+
+			function onData( event ) {
+
+				var data = JSON.parse( event.target.responseText );
+				var entries = data.feed.entry;
+
+				// console.log( entries );
+
+				for ( var i = 0; i < entries.length; i ++ ) {
+
+					var object = new Element( entries[ i ] );
+					scene.add( object );
+
+				}
+
+			}
+
+			function move( delta ) {
+
+				for ( var i = 0; i < scene.children.length; i ++ ) {
+
+					var object = scene.children[ i ];
+
+					object.position.z += delta;
+
+					if ( object.position.z > 0 ) {
+
+						object.position.z -= 5000;
+
+					} else if ( object.position.z < - 5000 ) {
+
+						object.position.z += 5000;
+
+					}
+
+				}
+
+			}
+
+			function onMouseWheel( event ) {
+
+				move( event.wheelDelta );
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				TWEEN.update();
+
+				if ( auto === true ) {
+
+					move( 1 );
+
+				}
+
+				renderer.render( scene, camera );
+
+			}
+		
+			// Enable the suggest feature.
+			$('#suggest').click(function(e) { search(''); });
+		</script>
+		
+		<script src="{{ STATIC_URL }}js/analytics.js"></script>
+	</body>
+</html>
